@@ -1,4 +1,38 @@
 
+%token T_ADD
+%token T_AND
+%token T_CALL
+%token T_DECLARE
+%token T_DIV
+%token T_ELSE
+%token T_ELSEIF
+%token T_END
+%token T_EOL
+%token T_EQ
+%token T_FOR
+%token T_FUNCTION
+%token T_GE
+%token T_GT
+%token T_IDENT
+%token T_IF
+%token T_INPUT
+%token T_LE
+%token T_LET
+%token T_LT
+%token T_MUL
+%token T_NE
+%token T_NOT
+%token T_OR
+%token T_POW
+%token T_PRINT
+%token T_REAL
+%token T_STEP
+%token T_SUB
+%token T_TEXT
+%token T_THEN
+%token T_TO
+%token T_WHILE
+
 %start Program
 %%
 Program
