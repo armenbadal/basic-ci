@@ -1,37 +1,29 @@
 
-%token T_ADD
-%token T_AND
-%token T_CALL
 %token T_DECLARE
-%token T_DIV
-%token T_ELSE
-%token T_ELSEIF
-%token T_END
-%token T_EOL
-%token T_EQ
-%token T_FOR
 %token T_FUNCTION
-%token T_GE
-%token T_GT
-%token T_IDENT
-%token T_IF
-%token T_INPUT
-%token T_LE
+%token T_END
 %token T_LET
-%token T_LT
-%token T_MUL
-%token T_NE
-%token T_NOT
-%token T_OR
-%token T_POW
+%token T_INPUT
 %token T_PRINT
-%token T_REAL
-%token T_STEP
-%token T_SUB
-%token T_TEXT
-%token T_THEN
-%token T_TO
+%token T_IF T_THEN T_ELSEIF T_ELSE
+%token T_FOR T_TO T_STEP
 %token T_WHILE
+%token T_CALL
+
+%token T_EOL
+
+%left T_OR
+%left T_AND
+%nonassoc T_EQ T_NE
+%nonassoc T_GT T_GE T_LT T_LE
+%left T_ADD T_SUB
+%left T_MUL T_DIV
+%right T_POW
+%right T_NOT
+
+%token T_IDENT
+%token T_REAL
+%token T_TEXT
 
 %start Program
 %%
@@ -82,37 +74,24 @@ StatementList
     ;
 
 Statement
-    : Let
-    | Input
-    | Print
-    | If
-    | For
-    | While
-    | Call
+    : LetOpt T_IDENT T_EQ Expression
+    | T_INPUT T_IDENT
+    | T_PRINT Expression
+    | T_IF Expression T_THEN NewLines StatementList
+      ElseIfPartList ElsePart T_END T_IF
+    | T_FOR T_IDENT T_EQ Expression T_TO Expression StepOpt NewLines
+      StatementList T_END T_FOR
+    | T_WHILE Expression NewLines StatementList T_END T_WHILE
+    | T_CALL T_IDENT ArgumentList
     ;
 
-Let
-    :  LetOpt T_IDENT T_EQ Disjunction
-    ;
 LetOpt
     : T_LET
     | %empty
     ;
 
-Input
-    : T_INPUT T_IDENT
-    ;
-
-Print
-    : T_PRINT Disjunction
-    ;
-
-If
-    : T_IF Disjunction T_THEN NewLines StatementList
-      ElseIfPartList ElsePart T_END T_IF
-    ;
 ElseIfPartList
-    : T_ELSEIF Disjunction T_THEN NewLines StatementList ElseIfPartList
+    : T_ELSEIF Expression T_THEN NewLines StatementList ElseIfPartList
     | %empty
     ;
 ElsePart
@@ -120,22 +99,10 @@ ElsePart
     | %empty
     ;
 
-For
-    : T_FOR T_IDENT T_EQ Disjunction T_TO Disjunction StepOpt NewLines
-      StatementList T_END T_FOR
-    ;
 StepOpt
     : T_STEP T_REAL
     | T_STEP T_SUB T_REAL
     | %empty
-    ;
-
-While
-    : T_WHILE Disjunction NewLines StatementList T_END T_WHILE
-    ;
-
-Call
-    : T_CALL T_IDENT ArgumentList
     ;
 
 ArgumentList
@@ -144,74 +111,30 @@ ArgumentList
     ;
 
 ExpressionList
-    : ExpressionList ',' Disjunction
-    | Disjunction
+    : ExpressionList ',' Expression
+    | Expression
     ;
 
-Disjunction
-    : Disjunction T_OR Conjunction
-    | Conjunction
-    ;
-
-Conjunction
-    : Conjunction T_AND Equality
-    | Equality
-    ;
-
-Equality
-    : Comparison EqualOp Comparison
-    | Comparison
-    ;
-EqualOp
-    : T_EQ
-    | T_NE
-    ;
-
-Comparison
-    : Addition CompOp Addition
-    | Addition
-    ;
-CompOp
-    : T_GT
-    | T_GE
-    | T_LT
-    | T_LE
-    ;
-
-Addition
-    : Addition AddOp Multiplication
-    | Multiplication
-    ;
-AddOp
-    : T_ADD
-    | T_SUB
-    ;
-
-Multiplication
-    : Multiplication MulOp Exponentation
-    | Exponentation
-    ;
-MulOp
-    : T_MUL
-    | T_DIV
-    ;
-
-Exponentation
-    : Primary T_POW Exponentation
-    | Primary
-    ;
-
-Primary
-    : T_IDENT '(' ArgumentList ')'
-    | '(' Disjunction ')'
-    | T_SUB Primary
-    | T_NOT Primary
-    | Factor
-    ;
-
-Factor
-    : T_REAL
-    | T_TEXT
+Expression
+    : Expression T_OR Expression
+    | Expression T_AND Expression
+    | Expression T_EQ Expression
+    | Expression T_NE Expression
+    | Expression T_GT Expression
+    | Expression T_GE Expression
+    | Expression T_LT Expression
+    | Expression T_LE Expression
+    | Expression T_ADD Expression
+    | Expression T_SUB Expression
+    | Expression T_MUL Expression
+    | Expression T_DIV Expression
+    | Expression T_POW Expression
+    | T_IDENT '(' ArgumentList ')'
+    | '(' Expression ')'
+    | T_SUB Expression %prec T_NOT
+    | T_NOT Expression
     | T_IDENT
+    | T_REAL
+    | T_TEXT
     ;
 
